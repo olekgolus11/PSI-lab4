@@ -29,12 +29,24 @@ class StudentAI:
     def use_activation_function(self, input_vector, activation_function):
         if activation_function == ActivationFunction.RLU:
             return self.rectified_linear_unit(input_vector)
+        elif activation_function == ActivationFunction.SIGMOID:
+            return self.sigmoid(input_vector)
+        elif activation_function == ActivationFunction.TANH:
+            return self.tanh(input_vector)
+        elif activation_function == ActivationFunction.SOFTMAX:
+            return self.softmax(input_vector)
         else:
             return input_vector
 
     def use_activation_function_derivative(self, input_vector, activation_function):
         if activation_function == ActivationFunction.RLU:
             return self.rectified_linear_unit_derivative(input_vector)
+        elif activation_function == ActivationFunction.SIGMOID:
+            return self.sigmoid_derivative(input_vector)
+        elif activation_function == ActivationFunction.TANH:
+            return self.tanh_derivative(input_vector)
+        elif activation_function == ActivationFunction.SOFTMAX:
+            return self.softmax_derivative(input_vector)
         else:
             return input_vector
 
@@ -186,3 +198,23 @@ class StudentAI:
     def rectified_linear_unit_derivative(self, x):
         res = np.where(x <= 0, 0, 1)
         return res
+
+    def sigmoid(self, x):
+        return 1 / (1 + np.exp(-x))
+
+    def sigmoid_derivative(self, x):
+        return self.sigmoid(x) * (1 - self.sigmoid(x))
+
+    def tanh(self, x):
+        return np.tanh(x)
+
+    def tanh_derivative(self, x):
+        return 1 - np.tanh(x) ** 2
+
+    def softmax(self, x):
+        return np.exp(x) / np.sum(np.exp(x), axis=0)
+
+    def softmax_derivative(self, x):
+        return self.softmax(x) * (1 - self.softmax(x))
+
+
