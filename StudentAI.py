@@ -1,5 +1,5 @@
 import numpy as np
-from Activation_function import Activation_function
+from ActivationFunction import ActivationFunction
 
 
 class StudentAI:
@@ -27,18 +27,18 @@ class StudentAI:
             raise Exception('Input vector dimensions doesnt match weight matrix')
 
     def use_activation_function(self, input_vector, activation_function):
-        if activation_function == Activation_function.RLU:
+        if activation_function == ActivationFunction.RLU:
             return self.rectified_linear_unit(input_vector)
         else:
             return input_vector
 
     def use_activation_function_derivative(self, input_vector, activation_function):
-        if activation_function == Activation_function.RLU:
+        if activation_function == ActivationFunction.RLU:
             return self.rectified_linear_unit_derivative(input_vector)
         else:
             return input_vector
 
-    def add_layer(self, n, weight_range_values=[0, 1], activation_function=Activation_function.NONE):
+    def add_layer(self, n, weight_range_values=[0, 1], activation_function=ActivationFunction.NONE):
         min_value = weight_range_values[0]
         max_value = weight_range_values[1]
 
@@ -53,7 +53,7 @@ class StudentAI:
             self.weights_matrix_list.append(matrix_layer)
             self.layers_activation_function_list.append(activation_function)
 
-    def add_custom_layer(self, matrix_layer, activation_function=Activation_function.RLU):
+    def add_custom_layer(self, matrix_layer, activation_function=ActivationFunction.RLU):
         if self.weights_matrix_list is None:
             self.weights_matrix_list = [matrix_layer]
             self.layers_activation_function_list = [activation_function]
@@ -109,7 +109,7 @@ class StudentAI:
                         delta = self.calculate_layer_delta_from_next_layer(delta, self.weights_matrix_list[
                             weight_matrix_index + 1])
                     if with_activation and weight_matrix_index != number_of_layers - 1 and \
-                            self.layers_activation_function_list[weight_matrix_index] != Activation_function.NONE:
+                            self.layers_activation_function_list[weight_matrix_index] != ActivationFunction.NONE:
                         delta = np.multiply(delta, self.use_activation_function_derivative(
                             all_input_vectors[weight_matrix_index + 1],
                             self.layers_activation_function_list[weight_matrix_index]))
