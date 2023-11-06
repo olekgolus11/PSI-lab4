@@ -106,7 +106,8 @@ class StudentAI:
 
     def train(self, input_values, expected_values, train_count, alpha, with_activation=True):
         for i in range(train_count):
-            for column_index in range(input_values.shape[1]):
+            number_of_series = input_values.shape[1]
+            for column_index in range(number_of_series):
                 input_series = input_values[:, column_index]
                 all_input_vectors = self.get_all_input_vectors(input_series, with_activation)
                 expected_series = expected_values[:, column_index]
@@ -116,12 +117,12 @@ class StudentAI:
                 weight_delta_list = []
                 for weight_matrix_index in range(number_of_layers - 1, -1, -1):
                     if weight_matrix_index == number_of_layers - 1:
-                        delta = self.calculate_layer_output_delta(input_series, expected_series, with_activation)
+                        delta = self.calculate_layer_output_delta(input_series, expected_series, number_of_series, with_activation)
                     else:
                         delta = self.calculate_layer_delta_from_next_layer(delta, self.weights_matrix_list[
                             weight_matrix_index + 1])
-                    if with_activation and weight_matrix_index != number_of_layers - 1 and \
-                            self.layers_activation_function_list[weight_matrix_index] != ActivationFunction.NONE:
+                    if with_activation and weight_matrix_index != number_of_layers - 1 and self.layers_activation_function_list[
+                        weight_matrix_index] != ActivationFunction.NONE:
                         delta = np.multiply(delta, self.use_activation_function_derivative(
                             all_input_vectors[weight_matrix_index + 1],
                             self.layers_activation_function_list[weight_matrix_index]))
@@ -132,12 +133,46 @@ class StudentAI:
                     self.weights_matrix_list[weight_matrix_index] = self.weights_matrix_list[weight_matrix_index] - \
                                                                     weight_delta_list[weight_matrix_index] * alpha
 
-    def get_all_input_vectors(self, input_values, with_activation):
+    def train_batch(self, input_values, expected_values, train_count, alpha, with_activation=True, with_dropout=False):
+        for i in range(train_count):
+            number_of_series = input_values.shape[1]
+            all_input_vectors = self.get_all_input_vectors(input_values, with_activation, with_dropout)
+            expected_series = expected_values
+            number_of_layers = len(self.weights_matrix_list)
+
+            delta = None
+            weight_delta_list = []
+            for weight_matrix_index in range(number_of_layers - 1, -1, -1):
+                if weight_matrix_index == number_of_layers - 1:
+                    delta = self.calculate_layer_output_delta(input_values, expected_values, number_of_series, with_activation)
+                else:
+                    delta = self.calculate_layer_delta_from_next_layer(delta, self.weights_matrix_list[
+                        weight_matrix_index + 1])
+                if with_activation and weight_matrix_index != number_of_layers - 1 and self.layers_activation_function_list[
+                    weight_matrix_index] != ActivationFunction.NONE:
+                    delta = np.multiply(delta, self.use_activation_function_derivative(
+                        all_input_vectors[weight_matrix_index + 1],
+                        self.layers_activation_function_list[weight_matrix_index]))
+                weight_delta = self.calculate_weight_delta(all_input_vectors[weight_matrix_index], delta)
+                weight_delta_list.append(weight_delta)
+            weight_delta_list.reverse()
+            for weight_matrix_index in range(number_of_layers):
+                self.weights_matrix_list[weight_matrix_index] = self.weights_matrix_list[weight_matrix_index] - \
+                                                                weight_delta_list[weight_matrix_index] * alpha
+
+    def get_all_input_vectors(self, input_values, with_activation, with_dropout=False):
         outputs = [input_values]
         for i in range(len(self.weights_matrix_list) - 1):
             layer_output = self.deep_neural_network(input_values, self.weights_matrix_list[:i + 1], with_activation)
+            if with_dropout:
+                self.dropout(layer_output, with_dropout)
             outputs.append(layer_output)
         return outputs
+
+    def dropout(self, input_values, dropout_probability):
+        mask = np.random.binomial(1, dropout_probability, size=input_values.shape)
+        mask = np.multiply(mask, 1 / dropout_probability)
+        return np.multiply(input_values, mask)
 
     def train_layer(self, input_values, expected_values, weight_matrix_index, alpha):
         pass
@@ -155,7 +190,7 @@ class StudentAI:
         print(self.get_error_for_series(input_values, expected_values))
 
     def calculate_weight_delta(self, input_values, delta):
-        weight_delta = np.outer(delta, input_values)
+        weight_delta = np.matmul(delta, input_values.T)
         return weight_delta
 
     def calculate_delta(self, input_values, expected_values, weights_matrix):
@@ -164,10 +199,10 @@ class StudentAI:
         delta = 2 * (1 / n) * (output - expected_values)
         return delta
 
-    def calculate_layer_output_delta(self, input_values, expected_values, with_activation):
+    def calculate_layer_output_delta(self, input_values, expected_values, batch_size, with_activation):
         n = len(expected_values)
         output = self.predict(input_values, with_activation)
-        delta = 2 * (1 / n) * (output - expected_values)
+        delta = 2 * (1 / n) * (output - expected_values) / batch_size
         return delta
 
     def calculate_layer_delta_from_next_layer(self, next_layer_delta, weights_matrix):
@@ -216,5 +251,3 @@ class StudentAI:
 
     def softmax_derivative(self, x):
         return self.softmax(x) * (1 - self.softmax(x))
-
-
