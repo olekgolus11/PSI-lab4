@@ -20,7 +20,7 @@ class StudentAI:
         try:
             for list_index, weights_matrix in enumerate(weights_matrix_list):
                 inputs = self.neural_network(inputs, weights_matrix)
-                if list_index is not len(self.weights_matrix_list) - 1 and with_activation:
+                if list_index  and with_activation:
                     inputs = self.use_activation_function(inputs, self.layers_activation_function_list[list_index])
             return inputs
         except:
@@ -121,7 +121,7 @@ class StudentAI:
                     else:
                         delta = self.calculate_layer_delta_from_next_layer(delta, self.weights_matrix_list[
                             weight_matrix_index + 1])
-                    if with_activation and weight_matrix_index != number_of_layers - 1 and self.layers_activation_function_list[
+                    if with_activation and self.layers_activation_function_list[
                         weight_matrix_index] != ActivationFunction.NONE:
                         delta = np.multiply(delta, self.use_activation_function_derivative(
                             all_input_vectors[weight_matrix_index + 1],
