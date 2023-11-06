@@ -31,6 +31,8 @@ test_images = test_images.reshape(10000, 784)
 train_images = train_images / 255
 test_images = test_images / 255
 
+# 1
+
 ex_number = 1
 
 studentAI = StudentAI(784)
@@ -42,7 +44,7 @@ else:
 studentAI.add_layer(10, [-0.1, 0.1])
 
 batch_size = 100
-alpha = 0.005
+alpha = 0.1
 iterations = 350
 if ex_number == 1:
     train_images_count = 1000
@@ -70,5 +72,5 @@ for i in range(test_images_count):
     if np.argmax(result) == np.argmax(expected_values):
         correct += 1
 
-studentAI.save_weights_npz(f"weights0{ex_number}")
+studentAI.save_weights_npz(f"weights1{ex_number}")
 print(f"Accuracy: {(correct / 10000) * 100}%, {correct} / 10000")
