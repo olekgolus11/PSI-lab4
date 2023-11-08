@@ -33,15 +33,16 @@ test_images = test_images / 255
 
 # 1
 
-ex_number = 1
+ex_number = 3
 
 studentAI = StudentAI(784)
+studentAI.load_weights_npz(f"weights1{ex_number}")
 
-if ex_number == 1:
-    studentAI.add_layer(40, [-0.1, 0.1], ActivationFunction.RLU)
-else:
-    studentAI.add_layer(100, [-0.1, 0.1], ActivationFunction.RLU)
-studentAI.add_layer(10, [-0.1, 0.1])
+# if ex_number == 1:
+#     studentAI.add_layer(40, [-0.1, 0.1], ActivationFunction.RLU)
+# else:
+#     studentAI.add_layer(100, [-0.1, 0.1], ActivationFunction.RLU)
+# studentAI.add_layer(10, [-0.1, 0.1])
 
 batch_size = 100
 alpha = 0.1
@@ -54,13 +55,13 @@ else:
     train_images_count = 60000
 test_images_count = 10000
 
-for k in range(iterations):
-    for i in range(train_images_count // batch_size):
-        input_values = np.transpose(np.matrix(train_images[i * batch_size:(i + 1) * batch_size]))
-        expected_values = np.zeros((10, batch_size))
-        for j in range(batch_size):
-            expected_values[train_labels[i * batch_size + j], j] = 1
-        studentAI.train_batch(input_values, expected_values, 1, alpha, with_dropout=0.5)
+# for k in range(iterations):
+#     for i in range(train_images_count // batch_size):
+#         input_values = np.transpose(np.matrix(train_images[i * batch_size:(i + 1) * batch_size]))
+#         expected_values = np.zeros((10, batch_size))
+#         for j in range(batch_size):
+#             expected_values[train_labels[i * batch_size + j], j] = 1
+#         studentAI.train_batch(input_values, expected_values, 1, alpha, with_dropout=0.5)
 
 correct = 0
 for i in range(test_images_count):
@@ -72,5 +73,5 @@ for i in range(test_images_count):
     if np.argmax(result) == np.argmax(expected_values):
         correct += 1
 
-studentAI.save_weights_npz(f"weights1{ex_number}")
+# studentAI.save_weights_npz(f"weights1{ex_number}")
 print(f"Accuracy: {(correct / 10000) * 100}%, {correct} / 10000")

@@ -20,7 +20,7 @@ class StudentAI:
         try:
             for list_index, weights_matrix in enumerate(weights_matrix_list):
                 inputs = self.neural_network(inputs, weights_matrix)
-                if list_index  and with_activation:
+                if self.layers_activation_function_list[list_index] != ActivationFunction.NONE and with_activation:
                     inputs = self.use_activation_function(inputs, self.layers_activation_function_list[list_index])
             return inputs
         except:
